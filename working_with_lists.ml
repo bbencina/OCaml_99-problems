@@ -212,3 +212,42 @@ let range m1 m2 =
   if m1 <= m2
   then ranging [] m1 m2
   else rev (ranging [] m2 m1)
+
+(*23*)
+(*Remove Random.self_init for reproducibility.*)
+let rand_select l n =
+  let rec ext_n acc l n =
+    match l, n with
+    | [], _ -> failwith "Empty list"
+    | hd :: tl, 0 -> (hd, acc @ tl)
+    | hd :: tl, n -> ext_n (hd :: acc) tl (n-1)
+  in
+  let ext_rand l len = ext_n [] l (Random.self_init () ; Random.int len)
+  in
+  let rec selecting acc n l len =
+    match n with
+    | 0 -> acc
+    | n ->
+      let (x, xs) = ext_rand l len
+      in selecting (x :: acc) (n-1) xs (len-1)
+  in
+  let len = length l
+  in selecting [] (min n len) l len
+
+(*24*)
+let lotto_select n m = rand_select (range 1 m) n
+
+(*25*)
+let permutation l = rand_select l (length l)
+
+(*26*)
+let rec extract k l =
+  if k <= 0
+  then [ [] ]
+  else match l with
+    | [] -> []
+    | hd :: tl ->
+      let headful = List.map (fun l -> hd :: l) (extract (k-1) tl)
+      in
+      let headless = extract k tl
+      in headful @ headless
